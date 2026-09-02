@@ -1,0 +1,154 @@
+# Part IV: Real Algorithms Cheat Elegantly
+
+# Timsort
+
+## Core idea
+
+**Exploit ordered runs already present in real data, use insertion techniques for small regions, and merge runs intelligently.**
+
+Timsort is not one pristine textbook trick. It is an engineered hybrid built around observations about actual inputs.
+
+## History and use
+
+Tim Peters created Timsort for Python in 2002. It subsequently became influential elsewhere, including implementations used in Java and other ecosystems. Python's built-in list sorting uses Timsort. Its design combines stable merging with exploitation of naturally occurring runs and careful merge policies.
+
+## Why learn it after the classics?
+
+You can now recognize its ingredients. Merge Sort contributes efficient stable combination. Insertion sorting contributes excellent behavior on small/nearly sorted regions. Adaptiveness contributes the idea that existing order is information worth preserving.
+
+## Performance
+
+Timsort has O(n log n) worst-case time and can approach O(n) on highly structured inputs. It is stable and uses auxiliary memory for merging.
+
+## Card-table approximation
+
+We will model the ideas rather than reproduce every production implementation detail.
+
+Take 20 cards. Before shuffling, create several locally sorted runs of varying lengths, then concatenate them in the wrong global order.
+
+1. Scan left to right looking for maximal ascending runs in canonical order.
+2. Mark the boundaries with scraps of paper or visible gaps.
+3. If a run is descending, reverse it to make it ascending.
+4. Use Insertion Sort to extend very short runs to a chosen minimum length, say 4 cards for our miniature exercise.
+5. Merge neighboring runs, preferring combinations that keep run sizes reasonably balanced.
+6. Continue until one run remains.
+
+Then repeat on a thoroughly shuffled packet. Compare the amount of work. Timsort's personality appears in the difference.
+
+## Computer versus table
+
+Humans notice runs almost effortlessly. Computers must scan and record their boundaries, but that cost is linear and can pay handsomely when real-world data contain structure. Temporary merge storage is cheap on the table as piles, but a genuine memory cost in software.
+
+## What should remain in your head
+
+> **Real data are often not random. Preserve and exploit work that the input has already done for you.**
+
+
+# Introsort
+
+## Core idea
+
+**Start with Quicksort, monitor whether recursion is becoming pathological, switch to Heapsort when necessary, and commonly use Insertion Sort for tiny partitions.**
+
+Introsort turns several algorithms you learned as competitors into cooperating components.
+
+## History and use
+
+David Musser proposed Introspective Sorting in 1997. The motivating idea is to retain Quicksort's excellent typical behavior while guarding against its O(n²) worst case. Variants of introspective sorting have been used in major standard libraries, notably C++ implementations of `std::sort`.
+
+## Simplified logic
+
+```text
+introsort(items, depth_limit):
+    while partition is not tiny:
+        if depth_limit exhausted:
+            heapsort(partition)
+            return
+        partition as in quicksort
+        recurse, reducing depth limit
+    insertion-sort tiny remainder
+```
+
+A typical initial depth limit is proportional to `2 * floor(log2(n))`.
+
+## Performance
+
+Worst-case time is O(n log n), while typical performance aims to resemble a well-engineered Quicksort. It is normally in-place apart from small recursion overhead and is not generally stable.
+
+## Card-table exercise
+
+Use 16 cards.
+
+1. Begin Quicksorting with a deliberately simplistic pivot rule.
+2. Keep a stack of coins beside the table as a **depth budget**. Remove one coin whenever recursion descends.
+3. If a partition remains large when the budget is exhausted, stop Quicksorting that region and Heap-sort it.
+4. For partitions of 4 or fewer cards, stop recursing and finish them with Insertion Sort.
+
+The exact thresholds are less important than the control idea: **observe your algorithm's behavior and change strategy when its assumptions stop paying off.**
+
+## What should remain in your head
+
+> **There is no prize for ideological purity. Use the algorithm whose strengths match the current subproblem.**
+
+
+# Synthesis: Choosing a Sorting Strategy
+
+You now know enough that “Which sorting algorithm is fastest?” should sound incomplete.
+
+Ask instead:
+
+1. How large is n?
+2. Are keys arbitrary comparable objects or structured/bounded values?
+3. Is the input random, nearly sorted, run-rich, or adversarial?
+4. Is stability required?
+5. Is auxiliary memory scarce?
+6. Are comparisons expensive?
+7. Are writes/movements expensive?
+8. Is worst-case latency important, or is excellent expected behavior enough?
+9. Does the storage medium favor sequential access or random access?
+10. What operations are cheap in the actual implementation world?
+
+## Comparative map
+
+| Algorithm | Typical reason to know/use it | Central weakness |
+|---|---|---|
+| Selection | few swaps; conceptual baseline | quadratic comparisons regardless of order |
+| Insertion | small or nearly sorted data | quadratic when disorder is large |
+| Bubble | exposes inversions/local swaps | generally inferior practical choice |
+| Merge | stable guaranteed n log n; sequential access | auxiliary storage for arrays |
+| Quick | excellent practical partition sort | naive versions have quadratic worst case |
+| Quickselect | find a rank without full sorting | not a complete sort; pivot sensitivity |
+| Heap | guaranteed n log n, low extra storage | locality/constants often unattractive |
+| Counting | small bounded integer-like key range | storage depends on key universe |
+| Radix | fixed structured keys | needs representation-aware stable passes |
+| Bucket | known favorable distribution | distribution assumptions can fail |
+| Shell | compact improvement over insertion | gap-dependent theory/performance |
+| Timsort | stable, adaptive real-world data | more machinery and merge memory |
+| Introsort | robust general-purpose hybrid | more complex; usually unstable |
+
+## Final deck challenge
+
+Shuffle all 52 cards thoroughly. Before touching them, choose **three** strategies:
+
+1. the algorithm you predict will minimize your physical effort;
+2. the algorithm you predict would be strongest for a conventional computer array of 52 card records;
+3. the algorithm you think best illuminates the structure of this particular card-ordering problem.
+
+Execute at least the first choice and justify all three.
+
+There is no requirement that the answers match. In fact, they probably should not.
+
+## The larger lesson
+
+Sorting algorithms are not really a catalogue of ways to arrange numbers. They are a compact laboratory for algorithmic thought:
+
+- exploit structure;
+- preserve useful information;
+- understand the representation;
+- identify expensive operations;
+- distinguish guarantees from averages;
+- recognize when a lower bound's assumptions apply;
+- combine strategies rather than worship one;
+- solve only as much of the problem as you actually need.
+
+A deck of cards makes those ideas visible because information has weight, position, orientation, and a cost to move.
