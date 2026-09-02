@@ -1,0 +1,93 @@
+# Appendix: Reference and Field Notes
+
+# Complexity at a Glance
+
+| Algorithm | Best | Average | Worst | Typical extra space | Stable? |
+|---|---:|---:|---:|---:|---|
+| Selection | n² | n² | n² | 1 | No |
+| Insertion | n | n² | n² | 1 | Yes |
+| Bubble (early exit) | n | n² | n² | 1 | Yes |
+| Merge | n log n | n log n | n log n | n | Yes |
+| Quick | n log n | n log n | n² | log n avg. recursion | Usually no |
+| Heap | n log n | n log n | n log n | 1 | No |
+| Counting | n+k | n+k | n+k | k or n+k | Can be |
+| Radix | d(n+k) | d(n+k) | d(n+k) | implementation-dependent | depends on stable passes |
+| Bucket | depends | often n under assumptions | can be n² | buckets | depends |
+| Shell | gap-dependent | gap-dependent | gap-dependent | 1 | Usually no |
+| Timsort | n | n log n | n log n | up to n scale | Yes |
+| Introsort | n log n class* | n log n | n log n | log n-ish control | No |
+
+`*` Production hybrids and cutoff details make a one-cell “best case” summary less informative than for elementary sorts.
+
+# Vocabulary
+
+**Adaptive:** benefits from existing structure/order in the input.
+
+**Auxiliary space:** storage used in addition to the input itself.
+
+**Comparison sort:** learns ordering primarily through pairwise comparisons.
+
+**In-place:** uses only small/constant auxiliary storage under the conventional model.
+
+**Invariant:** a condition guaranteed to remain true at a specified point in an algorithm.
+
+**Inversion:** a pair of items appearing in the opposite relative order from the target order.
+
+**Key:** the information used to determine an item's ordering position.
+
+**Partition:** rearrange/divide data according to its relationship to a pivot or criterion.
+
+**Stable:** preserves the original relative order of items with equal keys.
+
+**Run:** a contiguous sequence already ordered monotonically.
+
+# Blank Experiment Sheet
+
+Algorithm: ______________________________
+
+Packet size: __________  Initial condition: ______________________________
+
+| Measure | Count / notes |
+|---|---|
+| Comparisons | |
+| Swaps | |
+| Individual-card moves | |
+| Block moves | |
+| Temporary piles | |
+| Full/partial passes | |
+| Other | |
+
+**What felt expensive to my hands?**
+
+
+
+**What would likely be expensive to a computer?**
+
+
+
+**Where did the two models disagree?**
+
+
+
+**What property of the input did the algorithm exploit, ignore, or suffer from?**
+
+
+
+# Learner Draft 0.1 Field Notes
+
+This draft is intentionally meant to accumulate criticism.
+
+For each chapter, mark any place where:
+
+1. an instruction is ambiguous when cards are actually on the table;
+2. the physical procedure accidentally differs from the algorithm being taught;
+3. terminology arrives before its motivation;
+4. an exercise is too easy, tedious, or large;
+5. the computer/card comparison produces an unexpected insight worth expanding;
+6. code helps or distracts;
+7. a diagram would replace a paragraph;
+8. the canonical deck order creates an interesting special case;
+9. you discover a better physical gesture or layout;
+10. you can explain the algorithm more clearly after doing it than the book explained it beforehand.
+
+Those observations are not merely corrections. They are the raw material for the teaching edition.
