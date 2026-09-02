@@ -17,6 +17,7 @@ book:
 format:
   pdf:
     documentclass: scrbook
+    classoption: open=any
     papersize: letter
     fontsize: 11pt
     geometry:
