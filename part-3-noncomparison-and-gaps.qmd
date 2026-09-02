@@ -1,0 +1,197 @@
+# Part III: Stop Comparing Everything
+
+# Counting Sort
+
+## Core idea
+
+**Count how many items have each possible key, then reconstruct the ordered sequence from those counts.**
+
+Instead of asking whether one item precedes another, Counting Sort exploits a small known universe of possible key values.
+
+## History and use
+
+Counting techniques appear in early sorting literature and are natural whenever keys are bounded integers or can be mapped to a modest fixed range. Counting Sort is valuable when the key range is not much larger than the number of items. It becomes unattractive when that range is enormous and sparsely occupied.
+
+## Pseudocode
+
+```text
+make one counter for every possible key
+for each item:
+    increment its key's counter
+for keys in order:
+    output that key as many times as its count says
+```
+
+A fuller stable version uses cumulative counts to place complete records while retaining their relative order.
+
+## Python
+
+```python
+def counting_sort(values, maximum):
+    count = [0] * (maximum + 1)
+    for x in values:
+        count[x] += 1
+    out = []
+    for x, n in enumerate(count):
+        out.extend([x] * n)
+    return out
+```
+
+## Performance
+
+For n items and k possible key values, time is **O(n + k)** and auxiliary storage is O(k) (or O(n+k) for common stable output-array implementations).
+
+## Card-table procedure
+
+For this exercise, sort **by rank only**, so suits are payload rather than part of the key.
+
+Place 13 labeled locations across the table: A, 2, 3, …, K.
+
+Deal every card directly to its rank location. You never ask, “Is this card before that card?” You simply read the rank and address the appropriate bucket/counter.
+
+For literal Counting Sort, imagine recording only four tick marks at each rank and then reconstructing ranks from the counts. If you preserve the actual cards in piles, you have drifted toward bucket/distribution sorting, which is physically more natural and preserves payload.
+
+## Computer versus table
+
+Computers can cheaply maintain an integer array of 13 counters. Humans find it easier to make 13 physical piles. This is another useful mismatch between the abstract information used and its implementation medium.
+
+## What should remain in your head
+
+> **When keys come from a small known universe, use the key directly instead of repeatedly comparing items.**
+
+
+# Radix Sort
+
+## Core idea
+
+**Sort structured keys one component at a time.** A stable sort on successive digits or fields can produce complete order without directly comparing whole keys.
+
+Radix sorting has roots in punched-card tabulating and mechanical sorting, making its physical character unusually literal.
+
+## LSD radix idea
+
+For ordinary decimal numbers, least-significant-digit (LSD) radix sort stably distributes first by ones digit, then tens, then hundreds, and so forth.
+
+## Card-table version
+
+Our canonical card order is structurally unusual because suit determines not only the major group but also whether rank ascends or descends. For the cleanest first radix exercise, temporarily encode each card with a two-field key:
+
+1. suit group: ♠=0, ♥=1, ♣=2, ♦=3;
+2. within-suit position: A=0…K=12 for ♠/♥, but K=0…A=12 for ♣/♦.
+
+Now perform a stable LSD-style distribution:
+
+1. Stable-sort/deal by within-suit position.
+2. Collect without disturbing order within equal positions.
+3. Stable-sort/deal by suit group.
+4. Collect in suit-group order.
+
+The resulting deck follows our canonical order.
+
+## Performance
+
+For n items, d fields/digits, and radix k, common implementations run in **O(d(n+k))**. This can behave effectively linearly when d and k are bounded.
+
+## Crucial condition
+
+**Stability of the intermediate passes matters.** If the second distribution scrambles the order established by the first, the method fails.
+
+## What should remain in your head
+
+> **Exploit representation. Sort components stably so that later passes preserve useful work done earlier.**
+
+
+# Bucket Sort
+
+## Core idea
+
+**Distribute items into coarse ordered regions, sort within each region, then concatenate the regions.**
+
+Bucket sorting is most effective when the mapping spreads items reasonably evenly across buckets.
+
+## Card-table procedure
+
+Playing cards make the idea almost embarrassingly natural.
+
+1. Deal the deck into four suit buckets: ♠, ♥, ♣, ♦.
+2. Sort each suit bucket internally according to its required direction.
+3. Concatenate the four buckets.
+
+That sorts the full deck, but note how much domain knowledge you exploited. You knew in advance that suit divides the final ordering into four contiguous ranges.
+
+For a more general experiment, use 20 random cards and make coarse canonical-position buckets such as positions 1–13, 14–26, 27–39, 40–52. Then use Insertion Sort inside each bucket.
+
+## Performance
+
+With favorable distribution and suitable assumptions, expected performance can approach O(n); poor bucket assignment can collapse into quadratic behavior if most items land together and the internal sort is quadratic.
+
+## Computer versus table
+
+Humans are exceptionally good at spatial buckets. Creating four piles costs almost nothing cognitively. On a computer, buckets are data structures requiring allocation or indexing, but can still be highly efficient when the distribution is known.
+
+## What should remain in your head
+
+> **Use knowledge of the value distribution to reduce one large ordering problem into several small local ones.**
+
+
+# Shellsort
+
+## Core idea
+
+**Perform insertion-like sorting at large gaps first, then progressively reduce the gap until ordinary insertion sorting finishes the job.**
+
+Insertion Sort is excellent when items are already near their final positions. Shellsort tries to manufacture that favorable condition cheaply.
+
+## History
+
+Donald Shell published the method in 1959. Its analysis is unusually dependent on the chosen **gap sequence**, and decades of work have produced many sequences with different theoretical and empirical properties. That messiness is part of why Shellsort is intellectually interesting.
+
+## Simple pseudocode
+
+```text
+for gap in decreasing gaps ending with 1:
+    insertion-sort the interleaved subsequences separated by gap
+```
+
+## Python
+
+```python
+def shellsort(a):
+    gap = len(a) // 2
+    while gap > 0:
+        for i in range(gap, len(a)):
+            x = a[i]
+            j = i
+            while j >= gap and a[j-gap] > x:
+                a[j] = a[j-gap]
+                j -= gap
+            a[j] = x
+        gap //= 2
+    return a
+```
+
+This simple halving sequence is easy to learn, not necessarily optimal.
+
+## Card-table procedure
+
+Use 12 cards in a row. Try gaps **6, 3, 1**.
+
+For gap 6, positions 1 and 7 form a tiny subsequence, as do 2 and 8, and so on. Insertion-sort each such subsequence while leaving cards in their row positions.
+
+Then use gap 3: positions 1,4,7,10 form one subsequence; 2,5,8,11 another; 3,6,9,12 another.
+
+Finally use gap 1, which is ordinary Insertion Sort.
+
+Watch what happens to a card that begins very far from home. Unlike ordinary Insertion Sort, it can make a long jump early.
+
+## Performance
+
+There is no single complexity statement for “Shellsort” independent of gap sequence. Simple sequences can have O(n²) worst cases; better sequences provide substantially improved bounds and practical behavior. Auxiliary space is O(1), and typical implementations are not stable.
+
+## Computer versus table
+
+The algorithm's nonlocal accesses can be awkward for both humans and modern memory hierarchies. Yet the physical exercise makes its purpose crystal clear: remove large-scale disorder before paying for fine-scale insertion work.
+
+## What should remain in your head
+
+> **Insertion Sort struggles when an item is far from home. Let items travel long distances first, then progressively refine the order.**
