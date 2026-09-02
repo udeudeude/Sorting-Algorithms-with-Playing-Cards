@@ -43,22 +43,40 @@ For n items and k possible key values, time is **O(n + k)** and auxiliary storag
 
 ## Card-table procedure
 
-For this exercise, sort **by rank only**, so suits are payload rather than part of the key.
+For this exercise, sort **by rank only**, so suit is payload and cards of the same rank have equal keys. This lets Counting Sort teach stability rather than merely tallying ranks.
 
-Place 13 labeled locations across the table: A, 2, 3, …, K.
+Use **12 random cards**, plus paper for 13 counters and 12 labeled output positions.
 
-Deal every card directly to its rank location. You never ask, “Is this card before that card?” You simply read the rank and address the appropriate bucket/counter.
+### Phase 1: count
 
-For literal Counting Sort, imagine recording only four tick marks at each rank and then reconstructing ranks from the counts. If you preserve the actual cards in piles, you have drifted toward bucket/distribution sorting, which is physically more natural and preserves payload.
+1. Make counters A, 2, 3, …, K, all starting at zero.
+2. Scan the 12-card input once. Read each card's rank and increment that counter. Do not compare cards with one another.
+
+### Phase 2: cumulative counts
+
+3. Convert the counts into cumulative counts: the A counter says how many cards are A or earlier; the 2 counter says how many are 2 or earlier; and so on. A cumulative value therefore identifies the last output position belonging to that rank.
+
+### Phase 3: stable placement
+
+4. Scan the original input **from right to left**.
+5. For each card, read the cumulative counter for its rank. Place the card into that numbered output position, then decrement that counter.
+6. When the scan ends, the 12 output positions are sorted by rank. Cards with equal ranks retain their original relative order.
+
+Why right-to-left? If two equal-ranked cards occur left-to-right as X then Y, Y claims the last available slot for that rank first; X then takes the preceding slot, preserving X-before-Y.
+
+### The tempting shortcut
+
+If you simply deal cards into 13 rank piles and collect the piles, you are doing a **bucket/distribution procedure**, not literal Counting Sort. It may be physically better, but it stores the records themselves rather than counts. Keep the distinction.
 
 ## Computer versus table
 
-Computers can cheaply maintain an integer array of 13 counters. Humans find it easier to make 13 physical piles. This is another useful mismatch between the abstract information used and its implementation medium.
+**Computer:** integer counters and indexed output positions are cheap; the stable form uses an output array of size n.
+
+**Cards:** maintaining counters plus a separate output row feels fussier than simply making piles. That awkwardness is revealing: Counting Sort is especially natural for machines with cheap indexed memory, while bucket dealing is especially natural for hands.
 
 ## What should remain in your head
 
 > **When keys come from a small known universe, use the key directly instead of repeatedly comparing items.**
-
 
 # Radix Sort
 
@@ -81,10 +99,12 @@ Our canonical card order is structurally unusual because suit determines not onl
 
 Now perform a stable LSD-style distribution:
 
-1. Stable-sort/deal by within-suit position.
+1. Stable-sort by within-suit position. You may use the stable Counting Sort procedure from the previous lesson with 13 possible values.
 2. Collect without disturbing order within equal positions.
-3. Stable-sort/deal by suit group.
+3. Stable-sort by suit group using four possible values.
 4. Collect in suit-group order.
+
+The “within-suit position” is a derived digit: its numeric meaning depends on suit, but once each card has been mapped to the pair `(suit group, within-suit position)`, ordinary stable radix logic applies.
 
 The resulting deck follows our canonical order.
 
@@ -99,7 +119,6 @@ For n items, d fields/digits, and radix k, common implementations run in **O(d(n
 ## What should remain in your head
 
 > **Exploit representation. Sort components stably so that later passes preserve useful work done earlier.**
-
 
 # Bucket Sort
 
@@ -129,10 +148,19 @@ With favorable distribution and suitable assumptions, expected performance can a
 
 Humans are exceptionally good at spatial buckets. Creating four piles costs almost nothing cognitively. On a computer, buckets are data structures requiring allocation or indexing, but can still be highly efficient when the distribution is known.
 
+## Counting versus radix versus bucket
+
+These three methods are easy to blur on a card table:
+
+- **Counting Sort** stores how many records have each key, then calculates output positions.
+- **Radix Sort** performs stable passes over components of a structured key.
+- **Bucket Sort** stores the records themselves in coarse regions, then sorts within those regions.
+
+All exploit more information than a bare comparison sort, but they exploit it differently.
+
 ## What should remain in your head
 
 > **Use knowledge of the value distribution to reduce one large ordering problem into several small local ones.**
-
 
 # Shellsort
 
