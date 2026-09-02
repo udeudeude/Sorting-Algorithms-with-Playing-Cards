@@ -59,19 +59,25 @@ Packet size: __________  Initial condition: ______________________________
 
 **What felt expensive to my hands?**
 
-
+\vspace{0.7in}
+\hrule
 
 **What would likely be expensive to a computer?**
 
-
+\vspace{0.7in}
+\hrule
 
 **Where did the two models disagree?**
 
-
+\vspace{0.7in}
+\hrule
 
 **What property of the input did the algorithm exploit, ignore, or suffer from?**
 
+\vspace{0.7in}
+\hrule
 
+\newpage
 
 # Learner Draft 0.1 Field Notes
 
