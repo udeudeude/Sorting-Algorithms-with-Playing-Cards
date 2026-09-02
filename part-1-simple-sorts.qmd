@@ -85,10 +85,17 @@ Both require **45 comparisons**: 9 + 8 + … + 1.
 
 After pass k, the first k positions contain the first k cards of the final ordering, already permanently placed. This guaranteed truth is a **loop invariant**.
 
+## Two-model checkpoint
+
+**Computer:** selection sort is notable for doing a fixed quadratic number of comparisons but only O(n) swaps. It can make sense when writes are unusually expensive.
+
+**Cards:** distant swaps are comparatively clumsy, while sliding a block can be easy. The hand-natural version therefore changes the movement cost dramatically and can also make the sort stable.
+
+**Lesson:** the algorithm's comparison strategy and the implementation's movement strategy are separable questions.
+
 ## What should remain in your head
 
 > **Find the next item globally, put it permanently in place, repeat. Selection sort minimizes movement, not searching.**
-
 
 # Insertion Sort
 
@@ -157,10 +164,17 @@ Here the physically natural operation, extract + shift + insert, corresponds rem
 
 Run it on 10 random cards. Then run it on the sorted result. Finally reverse the packet and run it again. Count comparisons and card movements. You should feel three dramatically different workloads despite using the same algorithm on the same number of cards.
 
+## Two-model checkpoint
+
+**Computer:** in an array, inserting one item may require many element writes. Nevertheless, tiny loops and excellent behavior on nearly sorted data make Insertion Sort useful inside sophisticated hybrids.
+
+**Cards:** removing one card and sliding a whole block can feel like only one or two gestures. The table therefore makes insertion look even cheaper than an array does.
+
+**Lesson:** an O(n²) algorithm can still be the right tool for small n or favorable input.
+
 ## What should remain in your head
 
 > **Grow an ordered region by inserting each newcomer where it belongs. Existing order is valuable information.**
-
 
 # Bubble Sort
 
@@ -229,14 +243,19 @@ Adjacent swaps are less unnatural with cards than distant Selection Sort swaps, 
 
 Choose one card that belongs very early and deliberately put it at the far right. Watch how quickly it moves left. Now put a very late card at the far left and compare. Standard left-to-right Bubble Sort is directionally asymmetric: a late card can travel many positions right in one pass, while an early card generally moves left only one position per pass.
 
+## Two-model checkpoint
+
+**Computer:** Bubble Sort performs many branches, comparisons, and swaps and usually loses to better choices.
+
+**Cards:** adjacent swaps are simple but monotonous. That physical monotony corresponds to real repeated work rather than mere inconvenience.
+
+**Lesson:** locality can make an operation easy without making the total algorithm efficient.
+
 ## What should remain in your head
 
 > **Repair local inversions repeatedly until no disorder remains. Simple local work can require many global passes.**
 
-
 # Concept Interlude I: What the First Three Sorts Exposed
-
-You now have enough physical experience for several abstractions to mean something.
 
 ## Inversions
 
@@ -278,6 +297,12 @@ For algorithms, always ask at least:
 2. What is typical or average under a stated input model?
 3. What is the worst case?
 4. Which operation are we counting?
+
+## Asymptotics are not a stopwatch
+
+Big-O describes how a chosen cost grows as n grows; it does not tell you the exact running time for a particular small input. Constants, memory layout, branch behavior, implementation language, and the relative cost of comparisons versus movement can dominate at small n.
+
+That is why Insertion Sort can be a component of algorithms that are asymptotically better than Insertion Sort itself. For a tiny subproblem, the simpler quadratic method can cost less in reality.
 
 ## The two cost models revisited
 
