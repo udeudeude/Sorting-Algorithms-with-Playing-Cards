@@ -1,0 +1,35 @@
+project:
+  type: book
+
+book:
+  title: "Sorting Algorithms with Playing Cards"
+  subtitle: "Learner Draft 0.1"
+  author: "udeudeude"
+  date: today
+  chapters:
+    - index.qmd
+    - part-1-simple-sorts.qmd
+    - part-2-divide-partition-heaps.qmd
+    - part-3-noncomparison-and-gaps.qmd
+    - part-4-hybrids-and-synthesis.qmd
+    - appendix.qmd
+
+format:
+  pdf:
+    documentclass: scrbook
+    papersize: letter
+    fontsize: 11pt
+    geometry:
+      - margin=0.8in
+    toc: true
+    number-sections: true
+    colorlinks: true
+    keep-tex: false
+  html:
+    toc: true
+    number-sections: true
+
+execute:
+  freeze: auto
+
+lang: en-US
