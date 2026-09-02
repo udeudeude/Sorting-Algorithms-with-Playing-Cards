@@ -2,6 +2,8 @@
 
 # Complexity at a Glance
 
+The table below is a reference, not a ranking. Big-O suppresses constants and does not encode all costs. “Extra space” refers to conventional computer implementations, not square inches of table.
+
 | Algorithm | Best | Average | Worst | Typical extra space | Stable? |
 |---|---:|---:|---:|---:|---|
 | Selection | n² | n² | n² | 1 | No |
@@ -79,7 +81,7 @@ Packet size: __________  Initial condition: ______________________________
 
 \newpage
 
-# Learner Draft 0.1 Field Notes
+# Learner Draft 0.2 Field Notes
 
 This draft is intentionally meant to accumulate criticism.
 
