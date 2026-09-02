@@ -1,0 +1,277 @@
+# Part II: Divide, Partition, and Heap
+
+# Merge Sort
+
+## Core idea
+
+**Split the problem into smaller problems, sort those, then merge the sorted results.**
+
+Merge Sort is our first major divide-and-conquer sort.
+
+## History and use
+
+John von Neumann described Merge Sort in 1945. It remains fundamental because its O(n log n) worst-case behavior is dependable, merging is sequential and efficient, and the method works especially well for linked structures and external sorting where the data do not all fit conveniently in main memory.
+
+## Pseudocode
+
+```text
+merge_sort(sequence):
+    if size <= 1: return sequence
+    split sequence in half
+    left  = merge_sort(left half)
+    right = merge_sort(right half)
+    return merge(left, right)
+```
+
+To merge, repeatedly compare the exposed first items of two sorted sequences and take the earlier one.
+
+## Python
+
+```python
+def merge_sort(a):
+    if len(a) <= 1:
+        return a
+    m = len(a) // 2
+    left = merge_sort(a[:m])
+    right = merge_sort(a[m:])
+    out = []
+    i = j = 0
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            out.append(left[i]); i += 1
+        else:
+            out.append(right[j]); j += 1
+    return out + left[i:] + right[j:]
+```
+
+## Performance
+
+| Property | Merge sort |
+|---|---|
+| Best/average/worst | O(n log n) |
+| Typical array extra space | O(n) |
+| Stable? | Yes, conventionally |
+| In-place? | Usually no for arrays |
+
+## Card-table procedure
+
+Use 8 cards first because powers of two make the recursion visually clean.
+
+1. Split 8 into two piles of 4.
+2. Split each 4 into two piles of 2.
+3. Split each 2 into single cards. A one-card pile is already sorted.
+4. Merge neighboring singletons into sorted 2-card piles.
+5. Merge neighboring 2-card piles into sorted 4-card piles.
+6. Merge the two 4-card piles into one sorted 8-card pile.
+
+During a merge, expose the next card of each source pile. Compare only those two. Move the earlier one to the output. When one source empties, append the remainder of the other without further comparisons.
+
+### Computer versus table
+
+The table version is unusually natural: temporary piles are cheap and dealing a card to an output pile is easy. In an array, however, producing merged output generally requires auxiliary storage. The algorithm's elegant physical form hides a real memory cost in the computer model.
+
+## What should remain in your head
+
+> **Break the problem down until sorting is trivial; then make order by merging already ordered pieces.**
+
+
+# Quicksort
+
+## Core idea
+
+**Choose a pivot, partition the data around it, then recursively sort the partitions.**
+
+Merge Sort divides by *position* and combines afterward. Quicksort divides by *value relationship* and does its organizing work before recursion.
+
+## History and use
+
+Tony Hoare developed Quicksort in 1959 and published it in 1961. It became one of computing's canonical algorithms. Well-engineered Quicksort variants are fast in practice because of small constants and good locality, though naive pivot choices can produce quadratic worst cases.
+
+## Pseudocode
+
+```text
+quicksort(items):
+    if size <= 1: return
+    choose pivot
+    partition into items earlier than pivot and later than pivot
+    quicksort(earlier partition)
+    quicksort(later partition)
+```
+
+## Simple Python version
+
+```python
+def quicksort(a):
+    if len(a) <= 1:
+        return a
+    pivot = a[len(a) // 2]
+    low   = [x for x in a if x < pivot]
+    equal = [x for x in a if x == pivot]
+    high  = [x for x in a if x > pivot]
+    return quicksort(low) + equal + quicksort(high)
+```
+
+This is pedagogically clear but not the classic in-place implementation.
+
+## Performance
+
+| Property | Quicksort |
+|---|---|
+| Best/average | O(n log n) |
+| Worst | O(n²) |
+| Auxiliary space | implementation-dependent; recursion commonly O(log n) average |
+| Stable? | Usually no |
+| In-place? | Common implementations mostly yes |
+
+## Card-table procedure
+
+Deal 10 random cards. Choose a pivot by a fixed rule, initially the first card.
+
+1. Place the pivot visibly above the work area.
+2. Deal every other card into **EARLIER** or **LATER** piles according to the canonical order.
+3. Recursively partition the EARLIER pile.
+4. Recursively partition the LATER pile.
+5. Concatenate EARLIER result + pivot + LATER result.
+
+This pile-based version is much easier for hands than an in-place partition. It also uses O(n)-scale physical workspace. Later, try partitioning a row in place by swapping cards across a boundary. You will immediately understand why implementation details matter.
+
+### Pivot experiment
+
+Run first-card-pivot Quicksort on a shuffled packet. Then run it on an already sorted packet. The sorted packet, which helped Insertion Sort enormously, can be disastrous for this naive Quicksort. **“Already sorted” is not universally favorable input.**
+
+## What should remain in your head
+
+> **Put one item in its final relational neighborhood, split the problem around it, recurse. Pivot quality controls balance.**
+
+
+# Quickselect
+
+Quickselect is not a sorting algorithm. It belongs here because it reveals that partitioning is useful even when complete sorting would be wasteful.
+
+## Core idea
+
+To find the kth item, partition around a pivot as in Quicksort. Then recurse **only into the side containing the desired rank**.
+
+Tony Hoare's selection algorithm grows directly from the partitioning idea behind Quicksort.
+
+## Performance
+
+Expected time is **O(n)** with reasonable pivot behavior; naive pivot choices still permit O(n²) worst cases. More sophisticated pivot selection can guarantee linear worst-case selection, though that is beyond our main exercise.
+
+## Card-table exercise
+
+Shuffle all 52 cards. Your task is to find the card that would occupy position 26 in canonical order **without sorting the deck**.
+
+1. Choose a pivot.
+2. Partition into EARLIER and LATER piles.
+3. Count the EARLIER pile.
+4. If it has 25 cards, the pivot is your answer.
+5. If it has more than 25, discard the pivot and entire LATER pile from consideration and continue in EARLIER.
+6. If it has fewer, adjust the desired rank and continue only in LATER.
+
+Notice the growing pile of cards you never need to examine again.
+
+## What should remain in your head
+
+> **If you only need one rank, sorting everything may solve a much larger problem than you actually have.**
+
+
+# Heaps and Heapsort
+
+## Core idea
+
+A **heap** is a partially ordered tree-shaped structure in which every parent dominates its children according to the chosen ordering. Heapsort first builds this useful partial order, then repeatedly removes the extreme item.
+
+## History and use
+
+J. W. J. Williams introduced Heapsort in 1964. Robert Floyd soon supplied an efficient bottom-up heap-construction method. Heapsort gives O(n log n) worst-case time while requiring only constant auxiliary array storage, though it often loses to well-engineered Quicksort-like methods in practical locality and constants. The heap itself is crucial far beyond sorting, especially for priority queues.
+
+## Array relationships
+
+For a zero-indexed array, children of position i occur at `2i+1` and `2i+2`. That lets a complete binary tree live inside an ordinary array without pointer objects.
+
+## Performance
+
+| Property | Heapsort |
+|---|---|
+| Best/average/worst | O(n log n) |
+| Extra array storage | O(1) |
+| Stable? | No |
+| In-place? | Yes |
+
+## Card-table procedure
+
+This algorithm benefits from deliberately making the tree visible before imitating the compact array representation.
+
+Use 7 cards and lay them as:
+
+```text
+        1
+      /   \
+     2     3
+    / \   / \
+   4   5 6   7
+```
+
+Build a **max-heap** with respect to our canonical order: every parent must occur no earlier than either child.
+
+Whenever a child is later than its parent, exchange appropriately and continue repairing downward until the property holds.
+
+Once the heap is valid:
+
+1. The root is the latest card.
+2. Move it to the final sorted position.
+3. Move the last heap card to the root.
+4. Reduce the heap size by one.
+5. Sift the new root downward until the heap property returns.
+6. Repeat.
+
+Then repeat using cards in one horizontal row while mentally mapping positions to the tree. The physical tree is pedagogically easy but spatially expensive; the array representation is the computer trick.
+
+## Computer versus table
+
+Heapsort is one of our sharpest model disagreements. A computer can encode the tree implicitly with arithmetic on indices. Human hands benefit greatly from spreading it across the table. Conversely, jumping between parent and child indices can be less cache-friendly than scanning neighboring array elements.
+
+## What should remain in your head
+
+> **You do not need complete order to repeatedly know the next extreme item. Maintain just enough structure to make the next choice cheap.**
+
+
+# Concept Interlude II: The Comparison Barrier
+
+Selection, Insertion, Bubble, Merge, Quick, and Heap sorting ultimately learn order by asking questions equivalent to:
+
+> Is A before B?
+
+There is a fundamental limit to how efficiently such questions can completely sort arbitrary distinct items.
+
+## Decision-tree idea
+
+With n distinct items there are **n! possible initial orderings**. A comparison has two relevant outcomes: A precedes B or B precedes A. Therefore a sequence of comparisons behaves like a binary decision tree.
+
+To distinguish all n! possible orders, the tree needs at least n! leaves. A binary tree of height h has at most 2^h leaves, so:
+
+```text
+2^h >= n!
+h >= log2(n!)
+```
+
+And `log2(n!)` grows on the order of **n log n**.
+
+Thus any general comparison-based sorting algorithm requires **Ω(n log n)** comparisons in the worst case.
+
+## Feel it with cards
+
+With 3 distinct cards there are 6 possible orders. Two yes/no comparisons can distinguish at most 4 possibilities, so some cases require at least 3 comparisons.
+
+With 5 cards there are 120 possible orders. Six binary answers distinguish only 64 possibilities; seven can distinguish 128. Therefore some 5-card inputs require at least 7 comparisons.
+
+## Why this matters now
+
+Merge Sort and Heapsort's O(n log n) worst-case behavior is not merely pretty engineering. Among general comparison sorts, their asymptotic comparison count is already in the optimal class.
+
+So how can the next algorithms claim linear or near-linear performance?
+
+They change the rules.
+
+If a card tells you directly, “I am rank 7,” and you are allowed to use that value as an address or pile label, you are extracting more structured information than a yes/no comparison. The lower bound has not been defeated. **Its assumptions have been left behind.**
