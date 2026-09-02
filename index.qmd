@@ -1,6 +1,6 @@
 # How to Use This Book
 
-This is **Learner Draft 0.1**: a complete first-pass course meant to be printed, used with an ordinary 52-card deck, marked up, argued with, and improved from experience.
+This is **Learner Draft 0.2**: a complete first-pass course meant to be printed, used with an ordinary 52-card deck, marked up, argued with, and improved from experience.
 
 The aim is not merely to memorize names or Big-O notation. You should finish able to *feel* why different sorting strategies behave differently, predict what kinds of input help or hurt them, and distinguish the abstract algorithm from the machinery used to implement it.
 
@@ -12,9 +12,17 @@ Throughout the book, a fully sorted deck means:
 
 Thus A♠ is first overall and A♦ is last overall. When working with a packet rather than the whole deck, sort those cards into the relative order they would occupy in this 52-card sequence.
 
-## Two worlds, deliberately
+## Three layers, two cost models
 
-Every algorithm is considered under two cost models.
+For every algorithm, keep three things distinct:
+
+1. **The abstract algorithm:** the information it uses and the sequence of logical steps it requires.
+2. **A computer implementation:** one concrete way to represent those steps in arrays, lists, memory, and instructions.
+3. **A card-table implementation:** a faithful physical procedure for human hands.
+
+The same abstract algorithm can have multiple implementations. A physical shortcut may merely change the implementation, or it may quietly change the algorithm itself. We will say which.
+
+We then judge implementations under two cost models.
 
 ### Computer model
 
@@ -43,11 +51,9 @@ A pencil and scrap paper are useful. Depending on the lesson, count:
 5. temporary piles or other workspace;
 6. passes through the data.
 
-Exact counting matters more than speed at first.
+Exact counting matters more than speed at first. Do not combine unlike operations into one mystery total. Ten comparisons and two moves may be preferable to five comparisons and twenty moves, depending on the world you are modeling.
 
 ## The route through the book
-
-The sequence is designed so that later algorithms answer questions raised by earlier ones:
 
 1. Selection Sort
 2. Insertion Sort
@@ -73,8 +79,6 @@ The goal is cumulative understanding, not thirteen isolated recipes.
 Each lesson includes pseudocode and usually Python. You do **not** need a computer to complete this course. Code is included because it exposes what a computer must make explicit: indices, storage, comparisons, and movement. Read it as another representation of what your hands are doing.
 
 ## One recurring question
-
-At the end of every lesson, ask:
 
 > **What is expensive in this world?**
 
