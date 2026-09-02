@@ -66,6 +66,8 @@ Use 8 cards first because powers of two make the recursion visually clean.
 
 During a merge, expose the next card of each source pile. Compare only those two. Move the earlier one to the output. When one source empties, append the remainder of the other without further comparisons.
 
+When you later sort by a key that permits ties, take from the **left** source first when exposed keys are equal. That small tie rule is what makes the usual Merge Sort stable.
+
 ### Computer versus table
 
 The table version is unusually natural: temporary piles are cheap and dealing a card to an output pile is easy. In an array, however, producing merged output generally requires auxiliary storage. The algorithm's elegant physical form hides a real memory cost in the computer model.
@@ -73,7 +75,6 @@ The table version is unusually natural: temporary piles are cheap and dealing a 
 ## What should remain in your head
 
 > **Break the problem down until sorting is trivial; then make order by merging already ordered pieces.**
-
 
 # Quicksort
 
@@ -143,7 +144,6 @@ Run first-card-pivot Quicksort on a shuffled packet. Then run it on an already s
 
 > **Put one item in its final relational neighborhood, split the problem around it, recurse. Pivot quality controls balance.**
 
-
 # Quickselect
 
 Quickselect is not a sorting algorithm. It belongs here because it reveals that partitioning is useful even when complete sorting would be wasteful.
@@ -160,21 +160,20 @@ Expected time is **O(n)** with reasonable pivot behavior; naive pivot choices st
 
 ## Card-table exercise
 
-Shuffle all 52 cards. Your task is to find the card that would occupy position 26 in canonical order **without sorting the deck**.
+Start with **15 random cards**. Your task is to find the card that would occupy position 8 if those 15 cards were sorted, **without sorting the packet**. Once the method is clear, repeat with all 52 cards and find position 26.
 
 1. Choose a pivot.
 2. Partition into EARLIER and LATER piles.
 3. Count the EARLIER pile.
-4. If it has 25 cards, the pivot is your answer.
-5. If it has more than 25, discard the pivot and entire LATER pile from consideration and continue in EARLIER.
-6. If it has fewer, adjust the desired rank and continue only in LATER.
+4. If the EARLIER pile contains exactly `target rank - 1` cards, the pivot is your answer.
+5. If it contains too many, discard the pivot and entire LATER pile from consideration and continue in EARLIER.
+6. If it contains too few, discard EARLIER and the pivot, subtract their size from the target rank, and continue only in LATER.
 
 Notice the growing pile of cards you never need to examine again.
 
 ## What should remain in your head
 
 > **If you only need one rank, sorting everything may solve a much larger problem than you actually have.**
-
 
 # Heaps and Heapsort
 
@@ -213,18 +212,28 @@ Use 7 cards and lay them as:
    4   5 6   7
 ```
 
-Build a **max-heap** with respect to our canonical order: every parent must occur no earlier than either child.
+Build a **max-heap** with respect to our canonical order: every parent must be at least as late in the canonical order as either child. The root therefore holds the latest card in the heap.
 
-Whenever a child is later than its parent, exchange appropriately and continue repairing downward until the property holds.
+### Build the heap bottom-up
 
-Once the heap is valid:
+Leaves 4-7 already satisfy the heap property because they have no children. Start with the last parent and work backward: **3, then 2, then 1**.
 
-1. The root is the latest card.
-2. Move it to the final sorted position.
-3. Move the last heap card to the root.
-4. Reduce the heap size by one.
-5. Sift the new root downward until the heap property returns.
-6. Repeat.
+For each parent:
+
+1. Compare its two children if both exist; identify the later child.
+2. Compare that child with the parent.
+3. If the child is later, swap parent and child.
+4. Continue downward from the child's old position until the displaced card is no earlier than its children. This is **sifting down**.
+
+After processing parents 3, 2, and 1, the whole seven-card tree is a max-heap. Notice what is *not* guaranteed: siblings are not sorted, and the second-latest card need not be at position 2. The structure is only partially ordered.
+
+### Extract the sorted cards
+
+1. The root is now the latest remaining card. Move it to the far-right final sorted position.
+2. Move the last card of the active heap into the empty root.
+3. Shrink the active heap by one position.
+4. Sift the new root down, always exchanging it with its later child when that child is later than it.
+5. Repeat until the heap is empty.
 
 Then repeat using cards in one horizontal row while mentally mapping positions to the tree. The physical tree is pedagogically easy but spatially expensive; the array representation is the computer trick.
 
@@ -235,7 +244,6 @@ Heapsort is one of our sharpest model disagreements. A computer can encode the t
 ## What should remain in your head
 
 > **You do not need complete order to repeatedly know the next extreme item. Maintain just enough structure to make the next choice cheap.**
-
 
 # Concept Interlude II: The Comparison Barrier
 
