@@ -1,0 +1,300 @@
+# Part I: Simple Sorts
+
+# Selection Sort
+
+## Core idea
+
+**Repeatedly find the earliest remaining item and put it into the next available position.**
+
+Selection sort conceptually divides the collection into:
+
+**sorted | unsorted**
+
+Each pass enlarges the sorted region by one item.
+
+## History and use
+
+The method is older than electronic computing in spirit: repeatedly selecting the least remaining object is a natural manual procedure. Unlike Quicksort or Heapsort, it has no particularly useful single-inventor story. Today it is mainly educational or specialized. Its practical attraction is that it can perform many comparisons while requiring relatively few actual swaps or writes.
+
+## Pseudocode
+
+```text
+for each position i from first to second-to-last:
+    find the earliest item from i through the end
+    swap that item with the item at position i
+```
+
+## Python
+
+```python
+def selection_sort(items):
+    for i in range(len(items) - 1):
+        smallest = i
+        for j in range(i + 1, len(items)):
+            if items[j] < items[smallest]:
+                smallest = j
+        items[i], items[smallest] = items[smallest], items[i]
+    return items
+```
+
+## Performance
+
+| Property | Selection sort |
+|---|---|
+| Best time | O(n²) |
+| Average time | O(n²) |
+| Worst time | O(n²) |
+| Extra space | O(1) |
+| Comparisons | n(n−1)/2 |
+| Swaps | at most n−1 |
+| Stable normally? | No |
+| Adaptive? | No |
+| In-place? | Yes |
+
+For 52 cards it makes **1,326 comparisons**, even if the deck begins perfectly sorted.
+
+## Strengths and weaknesses
+
+Selection sort is simple, predictable, uses almost no extra storage, and minimizes swaps relative to many elementary sorts. It is poor on large collections because its comparison count remains quadratic and it gains essentially nothing from favorable initial order.
+
+## Card-table procedure
+
+Deal 10 random cards face-up in one row. Imagine a boundary before the first card. Everything left of it is finished.
+
+1. Scan **every card** in the unsorted region.
+2. Keep a finger on the earliest card seen so far. Your finger is the physical equivalent of the variable `smallest`.
+3. Only after scanning the entire region, swap that card with the first card in the unsorted region.
+4. Move the boundary one place right.
+5. Repeat. The last remaining card needs no comparison.
+
+Do not grab an attractive candidate early. The complete scan is part of the algorithm.
+
+### Experiment: computer-faithful versus hand-natural
+
+First use literal swaps. Then reset the packet and instead **extract** the selected card, slide the intervening block, and insert the card at the boundary.
+
+The second method is easier for hands, but notice what happened. You replaced one swap with potentially many data movements and, as a side effect, preserved the relative order of intervening equal-key items. This is a different implementation with different properties, often called stable selection by shifting.
+
+### Ten-card comparison experiment
+
+Run the algorithm on a random 10-card packet. Then run it again on the already sorted packet. Count comparisons.
+
+Both require **45 comparisons**: 9 + 8 + … + 1.
+
+## Invariant
+
+After pass k, the first k positions contain the first k cards of the final ordering, already permanently placed. This guaranteed truth is a **loop invariant**.
+
+## What should remain in your head
+
+> **Find the next item globally, put it permanently in place, repeat. Selection sort minimizes movement, not searching.**
+
+
+# Insertion Sort
+
+## Core idea
+
+**Maintain a sorted region and insert each new item into its proper place within that region.**
+
+This is close to how people naturally sort cards in a hand.
+
+## History and use
+
+Insertion sorting is another ancient-in-spirit procedure rather than an algorithm with a dramatic invention date. Despite quadratic worst-case behavior, it remains practically important because it is simple, has tiny overhead, performs very well on small or nearly sorted inputs, and is frequently used as the finishing component inside hybrid algorithms.
+
+## Pseudocode
+
+```text
+for each item after the first:
+    remember the item as key
+    shift larger preceding items one position right
+    insert key into the gap
+```
+
+## Python
+
+```python
+def insertion_sort(a):
+    for i in range(1, len(a)):
+        key = a[i]
+        j = i - 1
+        while j >= 0 and a[j] > key:
+            a[j + 1] = a[j]
+            j -= 1
+        a[j + 1] = key
+    return a
+```
+
+## Performance
+
+| Property | Insertion sort |
+|---|---|
+| Best time | O(n) |
+| Average time | O(n²) |
+| Worst time | O(n²) |
+| Extra space | O(1) |
+| Stable? | Yes, conventionally |
+| Adaptive? | Yes |
+| In-place? | Yes |
+
+## Why the best case matters
+
+If the data are already sorted, each new item needs essentially one comparison before the algorithm discovers that it is already where it belongs. Unlike Selection Sort, Insertion Sort can exploit existing order.
+
+## Card-table procedure
+
+Deal 10 random cards in a row. Treat the first card as a one-card sorted region.
+
+1. Remove the next card. This is your **key**.
+2. Compare it backward against the sorted cards.
+3. As long as the compared card belongs later than the key, shift it right.
+4. Insert the key into the gap.
+5. Repeat with the next previously untouched card.
+
+Here the physically natural operation, extract + shift + insert, corresponds remarkably well to the canonical computer algorithm. A block slide may feel like one hand action even though a conventional array implementation performs multiple writes. That discrepancy is worth noticing.
+
+### Experiments
+
+Run it on 10 random cards. Then run it on the sorted result. Finally reverse the packet and run it again. Count comparisons and card movements. You should feel three dramatically different workloads despite using the same algorithm on the same number of cards.
+
+## What should remain in your head
+
+> **Grow an ordered region by inserting each newcomer where it belongs. Existing order is valuable information.**
+
+
+# Bubble Sort
+
+## Core idea
+
+**Repeatedly compare neighboring items and swap any adjacent pair that is out of order.** Large-out-of-place items migrate toward their final end through successive local exchanges.
+
+## History and use
+
+Forms of exchange sorting appeared early in computing; the name “bubble sort” became established in the 1960s. It is famous far beyond its practical importance. Production code rarely chooses it because other methods are generally better, but pedagogically it makes local disorder, adjacent swaps, and inversions unusually visible.
+
+## Pseudocode
+
+```text
+repeat:
+    swapped = false
+    scan adjacent pairs from left to right
+    whenever a pair is backward:
+        swap it
+        swapped = true
+until no swap occurred
+```
+
+## Python
+
+```python
+def bubble_sort(a):
+    n = len(a)
+    while True:
+        swapped = False
+        for i in range(1, n):
+            if a[i - 1] > a[i]:
+                a[i - 1], a[i] = a[i], a[i - 1]
+                swapped = True
+        if not swapped:
+            return a
+        n -= 1
+```
+
+## Performance
+
+| Property | Bubble sort |
+|---|---|
+| Best time, with early exit | O(n) |
+| Average time | O(n²) |
+| Worst time | O(n²) |
+| Extra space | O(1) |
+| Stable? | Yes, if equals are not swapped |
+| Adaptive? | Somewhat |
+| In-place? | Yes |
+
+## Card-table procedure
+
+Deal 10 cards in a row.
+
+1. Compare cards 1 and 2. Swap them if backward.
+2. Compare cards 2 and 3. Swap if backward.
+3. Continue to the right edge.
+4. After one complete pass, the latest card in the packet is guaranteed to be at the right end.
+5. Repeat, shortening the active region by one each pass.
+6. If an entire pass produces no swaps, stop.
+
+Adjacent swaps are less unnatural with cards than distant Selection Sort swaps, but they can become tedious. That tedium is data.
+
+### Experiment
+
+Choose one card that belongs very early and deliberately put it at the far right. Watch how quickly it moves left. Now put a very late card at the far left and compare. Standard left-to-right Bubble Sort is directionally asymmetric: a late card can travel many positions right in one pass, while an early card generally moves left only one position per pass.
+
+## What should remain in your head
+
+> **Repair local inversions repeatedly until no disorder remains. Simple local work can require many global passes.**
+
+
+# Concept Interlude I: What the First Three Sorts Exposed
+
+You now have enough physical experience for several abstractions to mean something.
+
+## Inversions
+
+An **inversion** is a pair of items that occur in the opposite order from their required final order. A sorted sequence has zero inversions.
+
+An adjacent swap of an inverted pair removes exactly one inversion. This explains something profound about Bubble Sort: its number of swaps is exactly tied to how much pairwise disorder is present.
+
+Try this: take six cards, write down every pair that is backward, then Bubble Sort them and count swaps. Compare the totals.
+
+## Stability
+
+Suppose you temporarily sort **by rank only**, ignoring suit. Two 7s are then equal keys.
+
+A **stable** sort preserves their original relative order. If 7♥ began before 7♣, a stable rank-sort leaves 7♥ before 7♣.
+
+Stability matters when records contain more information than the key being sorted. It allows multiple sorts to compose sensibly. In cards, suit gives us a convenient visible identity for otherwise equal ranks.
+
+Exercise: take all four 5s, 6s, and 7s. Arrange them arbitrarily, record the suit order within each rank, then sort by rank with Insertion Sort without moving equal ranks past one another. Verify that the suit order survives.
+
+## In-place sorting
+
+An algorithm is generally called **in-place** when it rearranges the input using only a small, usually constant, amount of auxiliary storage rather than constructing another full-size collection.
+
+The card analogy is imperfect but useful. Sorting one row by exchanges uses the row itself. Dealing the whole packet into extensive temporary piles consumes additional workspace.
+
+## Adaptiveness
+
+An **adaptive** algorithm benefits when the input already possesses useful order.
+
+Selection Sort is conspicuously nonadaptive: sorted input still gets scanned exhaustively. Insertion Sort is strongly adaptive: nearly sorted input requires little shifting. Bubble Sort with an early-exit test can also notice that no work remains.
+
+## Best, average, and worst cases
+
+“O(n²)” is not a complete personality description. Selection, Insertion, and Bubble can all be called quadratic sorts, yet they respond very differently to sorted and nearly sorted data.
+
+For algorithms, always ask at least:
+
+1. What is the best case?
+2. What is typical or average under a stated input model?
+3. What is the worst case?
+4. Which operation are we counting?
+
+## The two cost models revisited
+
+On a computer, a swap of two array elements may require a few reads and writes. Sliding eight elements costs multiple writes. On your table, exchanging distant cards may feel like two or three actions while sliding an eight-card block may be one easy gesture.
+
+Therefore “fewest operations” is meaningless until **operation** has been defined.
+
+### Comparison exercise
+
+Take the same 10-card packet and run Selection Sort, Insertion Sort, and Bubble Sort separately, resetting the packet each time. Record:
+
+| Algorithm | Comparisons | swaps | single-card moves | block moves | passes |
+|---|---:|---:|---:|---:|---:|
+| Selection | | | | | |
+| Insertion | | | | | |
+| Bubble | | | | | |
+
+Then answer two different questions: **Which was cheapest for a computer-like model? Which was cheapest for your hands?**
+
+That distinction will follow us through the rest of the book.
