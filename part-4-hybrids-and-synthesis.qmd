@@ -43,7 +43,6 @@ Humans notice runs almost effortlessly. Computers must scan and record their bou
 
 > **Real data are often not random. Preserve and exploit work that the input has already done for you.**
 
-
 # Introsort
 
 ## Core idea
@@ -84,12 +83,21 @@ Use 16 cards.
 3. If a partition remains large when the budget is exhausted, stop Quicksorting that region and Heap-sort it.
 4. For partitions of 4 or fewer cards, stop recursing and finish them with Insertion Sort.
 
+Use **8 coins** for a 16-card exercise, corresponding to the common `2 × floor(log2(n))` depth limit. To make the fallback visible, first try a sorted or reverse-sorted packet with “first card” as the Quicksort pivot.
+
 The exact thresholds are less important than the control idea: **observe your algorithm's behavior and change strategy when its assumptions stop paying off.**
+
+## Computer versus table
+
+**Computer:** the monitoring overhead is tiny compared with the protection it buys against Quicksort's pathological recursion.
+
+**Cards:** switching from a pile-based Quicksort to a spatial heap is cumbersome. The table makes strategy-switching expensive in a way a program need not.
+
+**Lesson:** hybrid algorithms assume that switching implementations is cheap enough to justify exploiting different strengths.
 
 ## What should remain in your head
 
 > **There is no prize for ideological purity. Use the algorithm whose strengths match the current subproblem.**
-
 
 # Synthesis: Choosing a Sorting Strategy
 
