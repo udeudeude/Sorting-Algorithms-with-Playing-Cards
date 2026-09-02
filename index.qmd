@@ -1,0 +1,81 @@
+# How to Use This Book
+
+This is **Learner Draft 0.1**: a complete first-pass course meant to be printed, used with an ordinary 52-card deck, marked up, argued with, and improved from experience.
+
+The aim is not merely to memorize names or Big-O notation. You should finish able to *feel* why different sorting strategies behave differently, predict what kinds of input help or hurt them, and distinguish the abstract algorithm from the machinery used to implement it.
+
+## The canonical card order
+
+Throughout the book, a fully sorted deck means:
+
+**A–K spades → A–K hearts → K–A clubs → K–A diamonds**
+
+Thus A♠ is first overall and A♦ is last overall. When working with a packet rather than the whole deck, sort those cards into the relative order they would occupy in this 52-card sequence.
+
+## Two worlds, deliberately
+
+Every algorithm is considered under two cost models.
+
+### Computer model
+
+We care about such things as comparisons, reads and writes, swaps, auxiliary memory, recursion, locality/cache behavior, and best/average/worst-case growth.
+
+### Card-table model
+
+We care about comparisons, individual-card moves, swaps, block moves, dealing into piles, table space, remembering positions, and the awkwardness imposed by human hands.
+
+These models sometimes disagree. That is not a flaw in the course. It is one of its central lessons: **efficiency only has meaning after deciding which operations are expensive.**
+
+## How to perform the exercises
+
+Start most new algorithms with **10 random cards** dealt face-up. Ten is large enough to display interesting behavior and small enough that you can watch every operation. Once the method is comfortable, repeat with larger packets and eventually the full deck where useful.
+
+Do not silently optimize an algorithm with human intuition. If the rule says compare adjacent cards, compare adjacent cards. If it says scan the whole unsorted region, scan the whole region. We sometimes deliberately try a physically more natural variant afterward and ask whether we have merely implemented the same algorithm differently or changed the algorithm itself.
+
+## What to record
+
+A pencil and scrap paper are useful. Depending on the lesson, count:
+
+1. comparisons;
+2. swaps;
+3. individual-card moves;
+4. block moves;
+5. temporary piles or other workspace;
+6. passes through the data.
+
+Exact counting matters more than speed at first.
+
+## The route through the book
+
+The sequence is designed so that later algorithms answer questions raised by earlier ones:
+
+1. Selection Sort
+2. Insertion Sort
+3. Bubble Sort
+4. Concept Interlude I: inversions, stability, in-place sorting, adaptiveness, and cost models
+5. Merge Sort
+6. Quicksort
+7. Quickselect
+8. Heaps and Heapsort
+9. Concept Interlude II: why comparison sorting hits an Ω(n log n) barrier
+10. Counting Sort
+11. Radix Sort
+12. Bucket Sort
+13. Shellsort
+14. Timsort
+15. Introsort
+16. Synthesis: choosing a strategy
+
+The goal is cumulative understanding, not thirteen isolated recipes.
+
+## A note on code
+
+Each lesson includes pseudocode and usually Python. You do **not** need a computer to complete this course. Code is included because it exposes what a computer must make explicit: indices, storage, comparisons, and movement. Read it as another representation of what your hands are doing.
+
+## One recurring question
+
+At the end of every lesson, ask:
+
+> **What is expensive in this world?**
+
+Keep that question nearby. It is more important than memorizing any complexity table.
