@@ -32,6 +32,8 @@ jobs:
           python-version: '3.12'
       - name: Install booklet imposition library
         run: python -m pip install 'pymupdf==1.26.5'
+      - name: Test booklet imposition
+        run: python tests/test_booklet.py
       - name: Build standard reading PDF
         shell: bash
         run: |
