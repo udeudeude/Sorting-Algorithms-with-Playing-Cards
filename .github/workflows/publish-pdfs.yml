@@ -1,12 +1,12 @@
-name: Build downloadable course and booklet PDFs
+name: Publish current illustrated book edition
 
 on:
   push:
     branches: [main]
     paths:
-      - 'drafts/0.3/**'
-      - 'scripts/impose_booklet.py'
-      - 'tests/test_booklet.py'
+      - 'current-edition.json'
+      - 'editions/**'
+      - 'scripts/validate_edition.py'
       - '.github/workflows/publish-pdfs.yml'
   workflow_dispatch:
 
@@ -14,103 +14,93 @@ permissions:
   contents: write
 
 concurrency:
-  group: publish-sorting-pdfs
-  cancel-in-progress: true
+  group: current-book-edition
+  cancel-in-progress: false
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Pandoc and LaTeX
-        uses: quarto-dev/quarto-actions/setup@v2
-        with:
-          tinytex: true
-      - name: Install XeLaTeX and DejaVu fonts
-        run: sudo apt-get update && sudo apt-get install -y texlive-xetex texlive-latex-extra fonts-dejavu-core
-      - name: Verify PDF engine
-        run: xelatex --version
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install booklet imposition library
-        run: python -m pip install 'pymupdf==1.26.5'
-      - name: Test booklet imposition
-        run: python tests/test_booklet.py
-      - name: Prepare current 0.3 manuscript
+      - name: Check if approved originals are staged
+        id: files
         shell: bash
         run: |
           python - <<'PY'
+          import json
+          import os
           from pathlib import Path
-          manuscript = Path('drafts/0.3/book.md').read_text(encoding='utf-8')
-          art = Path('drafts/0.3/art-sheet.png')
-          if not art.exists():
-              missing = r'\includegraphics[width=0.95\textwidth,height=5.6in,keepaspectratio]{art-sheet.png}'
-              assert missing in manuscript, 'Expected 0.3 cover image reference is missing'
-              manuscript = manuscript.replace(missing, r'\vspace*{1.5in}')
-              print('Cover artwork not committed; keep existing typography and omit missing image')
-          Path('_build').mkdir(exist_ok=True)
-          Path('_build/manuscript.md').write_text(manuscript, encoding='utf-8')
+          edition = json.loads(Path('current-edition.json').read_text())
+          paths = [Path(item['path']) for item in edition['files'].values()]
+          ready = all(path.is_file() for path in paths)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('ready=' + str(ready).lower() + '\n')
+          if not ready:
+              print('Original edition PDFs not yet committed: ' +
+                    ', '.join(str(path) for path in paths if not path.is_file()))
+              print('No older draft will be published as a substitute.')
           PY
-      - name: Render standard reading PDF from 0.3 manuscript
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p downloads
-          quarto pandoc _build/manuscript.md --from markdown+raw_tex \
-            --pdf-engine=xelatex --resource-path=drafts/0.3 \
-            --output downloads/sorting-algorithms-with-playing-cards.pdf
-      - name: Render compact booklet and impose duplex sheets
-        shell: bash
-        run: |
-          set -euo pipefail
-          quarto pandoc _build/manuscript.md --from markdown+raw_tex \
-            --pdf-engine=xelatex --resource-path=drafts/0.3 \
-            --metadata papersize:a5 --metadata geometry:margin=0.5in \
-            --output downloads/sorting-algorithms-booklet-pages.pdf
-          python scripts/impose_booklet.py \
-            downloads/sorting-algorithms-booklet-pages.pdf \
-            downloads/sorting-algorithms-booklet-print.pdf \
-            --signature-sheets 8
-      - name: Verify PDF content and duplex geometry
+      - name: Install PDF validator
+        if: steps.files.outputs.ready == 'true'
+        run: python -m pip install 'pymupdf==1.26.5'
+      - name: Validate illustration count, duplex orientation and content parity
+        if: steps.files.outputs.ready == 'true'
+        run: python scripts/validate_edition.py current-edition.json
+      - name: Stage identical bytes under stable download names
+        if: steps.files.outputs.ready == 'true'
         shell: bash
         run: |
           python - <<'PY'
-          import fitz
+          import json
+          import shutil
           from pathlib import Path
-          root = Path('downloads')
-          expected = {
-              'sorting-algorithms-with-playing-cards.pdf',
-              'sorting-algorithms-booklet-pages.pdf',
-              'sorting-algorithms-booklet-print.pdf',
-          }
-          assert {p.name for p in root.glob('*.pdf')} == expected
-          for filename in sorted(expected):
-              doc = fitz.open(root / filename)
-              assert doc.page_count > 4, (filename, doc.page_count)
-              text = ''.join(page.get_text() for page in doc)
-              assert 'Sorting Algorithms' in text, filename
-              assert 'Cycle Sort' in text or 'Cycle' in text, filename
-              if filename.endswith('booklet-print.pdf'):
-                  assert doc.page_count % 2 == 0
-                  assert all(abs(page.rect.width - 792) < 1 and abs(page.rect.height - 612) < 1 for page in doc)
-              print(filename, doc.page_count, 'pages')
+          edition = json.loads(Path('current-edition.json').read_text())
+          out = Path('dist')
+          out.mkdir(exist_ok=True)
+          shutil.copyfile(edition['files']['reading']['path'], out / 'Sorting-Algorithms-with-Playing-Cards.pdf')
+          shutil.copyfile(edition['files']['booklet']['path'], out / 'Sorting-Algorithms-with-Playing-Cards-Booklet-LONG-EDGE.pdf')
           PY
       - uses: actions/upload-artifact@v4
+        if: steps.files.outputs.ready == 'true'
         with:
-          name: sorting-algorithms-draft-03-pdfs
-          path: downloads/*.pdf
-      - name: Publish stable direct-download release assets
+          name: verified-current-book-edition
+          path: dist/*.pdf
+      - name: Publish both validated files as the latest edition
+        if: steps.files.outputs.ready == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          if ! gh release view learner-draft-0.3 > /dev/null 2>&1; then
-            gh release create learner-draft-0.3 \
-              --target main \
-              --title "Sorting Algorithms with Playing Cards - Learner Draft 0.3" \
-              --notes "Field-test manuscript 0.3. Includes a standard reading PDF, compact reading pages and duplex-imposed US-letter booklet PDF. Print the imposed booklet landscape, double-sided, short-edge flip, actual size. Fold each eight-sheet signature separately." \
-              --prerelease
+          VERSION="$(python -c "import json; print(json.load(open('current-edition.json'))['version'])")"
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+            echo "Invalid edition: $VERSION" >&2
+            exit 1
           fi
-          gh release upload learner-draft-0.3 downloads/*.pdf --clobber
+          TAG="v${VERSION}"
+          cat > /tmp/edition-notes.txt <<EOF
+          Sorting Algorithms with Playing Cards, learner edition ${VERSION}.
+
+          These are the original approved illustrated PDFs, not a rebuild of draft 0.3.
+          Print the booklet landscape, double-sided, flip on LONG edge, at actual size.
+          Edition 0.5 occupies 18 sheets. File checksums are in current-edition.json.
+          EOF
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --draft --target "$GITHUB_SHA" \
+              --title "Sorting Algorithms with Playing Cards - Edition $VERSION" \
+              --notes-file /tmp/edition-notes.txt
+          fi
+          gh release upload "$TAG" \
+            dist/Sorting-Algorithms-with-Playing-Cards.pdf \
+            dist/Sorting-Algorithms-with-Playing-Cards-Booklet-LONG-EDGE.pdf \
+            --clobber
+          gh release edit "$TAG" --draft=false --prerelease=false --latest \
+            --title "Sorting Algorithms with Playing Cards - Edition $VERSION" \
+            --notes-file /tmp/edition-notes.txt
+          ASSETS="$(gh release view "$TAG" --json assets --jq '.assets[].name')"
+          echo "$ASSETS" | grep -Fxq 'Sorting-Algorithms-with-Playing-Cards.pdf'
+          echo "$ASSETS" | grep -Fxq 'Sorting-Algorithms-with-Playing-Cards-Booklet-LONG-EDGE.pdf'
+          echo "Published verified edition $VERSION."
