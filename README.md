@@ -2,7 +2,7 @@
 
 A hands-on course for learning sorting algorithms with a standard 52-card deck while comparing two different worlds of algorithmic cost: **what is efficient for a computer** and **what is efficient for human hands at a table**.
 
-The current manuscript is **Learner Draft 0.1**. It is deliberately complete before it is polished: the first learner will print it, work through it with cards, and use that experience to drive the teaching edition.
+The current manuscript is **Learner Draft 0.2**. It is deliberately complete before it is polished: the first learner will print it, work through it with cards, and use that experience to drive the teaching edition.
 
 ## Canonical deck order
 
@@ -39,25 +39,31 @@ All full-deck exercises use:
 - `appendix.qmd` — reference tables, vocabulary, printable experiment sheet, field-note prompts
 - `_quarto.yml` — Quarto book configuration
 
-## Build the printable PDF
+## Printable downloads
 
-Install [Quarto](https://quarto.org/) and a TeX distribution supported by Quarto, then from the repository directory run:
+These downloads are built from the current manuscript and published as **Learner Draft 0.2** release assets:
+
+- [Download the complete course (standard PDF)](https://github.com/udeudeude/Sorting-Algorithms-with-Playing-Cards/releases/download/learner-draft-0.2/sorting-algorithms-with-playing-cards.pdf)
+- [Download the printer-ready folded booklet (PDF)](https://github.com/udeudeude/Sorting-Algorithms-with-Playing-Cards/releases/download/learner-draft-0.2/sorting-algorithms-booklet-print.pdf)
+- [Download the small-page booklet for reading (PDF)](https://github.com/udeudeude/Sorting-Algorithms-with-Playing-Cards/releases/download/learner-draft-0.2/sorting-algorithms-booklet-pages.pdf)
+
+The printer-ready booklet is imposed two-up on **US-letter landscape sheets**. Print double-sided, **flip on short edge**, at actual size. Fold each set of up to eight sheets separately into signatures, then stack them in sequence. The small-page booklet PDF is intended for screen reading or manual printing, not automatic duplex imposition.
+
+## Rebuild the PDFs
+
+Install [Quarto](https://quarto.org/), a compatible LaTeX distribution, and PyMuPDF, then:
 
 ```bash
 quarto render --to pdf
+quarto render --to pdf --profile booklet
+python scripts/impose_booklet.py <booklet-pages.pdf> <booklet-print.pdf>
 ```
 
-The generated book will appear under `_book/`.
-
-For a browser version:
-
-```bash
-quarto render --to html
-```
+GitHub Actions builds, validates, and uploads all three PDFs to the same tagged pre-release when the manuscript changes. The manuscript remains a learner draft, not a finished teaching edition.
 
 ## Status
 
-**Learner Draft 0.1** is a field-test manuscript, not a finished publication. The source is intentionally modular so lessons, exercises, diagrams, and explanatory interludes can be revised independently after actual use.
+**Learner Draft 0.2** is a field-test manuscript, not a finished publication. The source is intentionally modular so lessons, exercises, diagrams, and explanatory interludes can be revised independently after actual use.
 
 ## Suggested GitHub repository description
 

@@ -1,0 +1,14 @@
+# Compact reading edition for half-letter booklet imposition.
+# Quarto uses A5 pages here; each page is scaled slightly to a half-letter panel.
+format:
+  pdf:
+    papersize: a5
+    fontsize: 10pt
+    pdf-engine: xelatex
+    geometry:
+      - top=0.52in
+      - bottom=0.52in
+      - left=0.55in
+      - right=0.55in
+    toc: true
+    number-sections: true
