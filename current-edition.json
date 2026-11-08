@@ -1,0 +1,19 @@
+{
+  "version": "0.5",
+  "title": "Sorting Algorithms with Playing Cards: Learner Edition 0.5",
+  "minimum_illustrations": 17,
+  "booklet_sheets": 18,
+  "duplex": "landscape, double-sided, flip on long edge, actual size",
+  "files": {
+    "reading": {
+      "path": "editions/0.5/Sorting-Cards-Learner-0.5.pdf",
+      "pages": 55,
+      "sha256": "3833d2ac0623fab534c2170529200d29787aee3bcf317bbb5667794cd2a19dd7"
+    },
+    "booklet": {
+      "path": "editions/0.5/Sorting-Cards-Learner-0.5-BOOKLET-LONG-EDGE-18-SHEETS.pdf",
+      "pages": 36,
+      "sha256": "48942015426ddacf78fa2760b7141264638e79f13bcf1a444a5c1aa713a6eb20"
+    }
+  }
+}
