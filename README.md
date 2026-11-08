@@ -1,67 +1,54 @@
 # Sorting Algorithms with Playing Cards
 
-A hands-on course for learning sorting algorithms with a standard 52-card deck while comparing two different worlds of algorithmic cost: **what is efficient for a computer** and **what is efficient for human hands at a table**.
+An illustrated, hands-on course in thirteen sorting algorithms using a standard 52-card deck. Each method is examined in three settings: on a computer, on a table, and in the hands.
 
-The current manuscript is **Learner Field-Test Edition 0.3**. It is deliberately complete before it is polished: the first learner will print it, work through it with cards, and use that experience to drive the teaching edition.
+## Current edition: Learner 0.5
+
+**The approved edition is 0.5, not the older 0.3 manuscript or its automatically rendered PDFs.**
+
+The authoritative publication consists of two matching, illustrated PDFs:
+
+1. **Reading edition:** 55 pages, 17 embedded illustrations.
+2. **Print booklet:** 36 landscape PDF pages representing 72 imposed booklet pages, on **18 sheets**, with 17 embedded illustrations. **Print landscape, double-sided, flip on the LONG edge, actual size.**
+
+[Browse published releases](https://github.com/udeudeude/Sorting-Algorithms-with-Playing-Cards/releases). **The release is current only when it is version 0.5 or newer.** Older version 0.3 downloads remain available solely as an archive.
+
+The approved 0.5 originals have fixed SHA-256 checksums recorded in [current-edition.json](current-edition.json). Until both originals are committed at the paths in that manifest, the release workflow deliberately publishes nothing instead of substituting an inferior draft.
+
+## Contents
+
+- Selection, Insertion and Bubble Sort
+- Inversions, stability and sorting cost models
+- Merge Sort, Quicksort, Quickselect and Heapsort
+- The comparison-sorting lower bound
+- Counting, Radix and Bucket Sort
+- Shellsort, Timsort, Introsort and Cycle Sort
+- Choosing a strategy, a complexity comparison, a glossary and card exercises
 
 ## Canonical deck order
 
-All full-deck exercises use:
+**A–K ♠ → A–K ♥ → A–K ♣ → A–K ♦.** Ace is the earliest rank in each suit; King is the latest. There are no jokers.
 
-**A–K ♠ → A–K ♥ → K–A ♣ → K–A ♦**
+## Edition publishing and maintenance
 
-## Curriculum
+The repository's [current-edition.json](current-edition.json) is the **single source of truth for the currently approved export pair**. Both files must be present and must agree with its hashes, page counts and illustration requirements.
 
-1. Selection Sort
-2. Insertion Sort
-3. Bubble Sort
-4. Concept Interlude: inversions, stability, in-place sorting, adaptiveness, cost models
-5. Merge Sort
-6. Quicksort
-7. Quickselect
-8. Heaps and Heapsort
-9. Concept Interlude: the Ω(n log n) comparison-sorting lower bound
-10. Counting Sort
-11. Radix Sort
-12. Bucket Sort
-13. Shellsort
-14. Timsort
-15. Introsort
-16. Cycle Sort
-17. Synthesis and strategy selection
+Whenever the book is revised:
 
-## Project structure
+1. Work from the latest approved edition **and all subsequent improvements**, never silently regenerate from the historical 0.3 draft.
+2. Produce and review both updated PDFs. Check all diagrams, code, tables and print imposition.
+3. Place the approved PDFs in a new versioned folder under editions/, update current-edition.json with both file paths, SHA-256 checksums and page counts.
+4. Commit the changes to main. [The publisher](.github/workflows/publish-pdfs.yml) verifies the original files, their shared content, illustration count and long-edge booklet orientation, and publishes them together in a versioned GitHub release marked **latest**.
+5. The [Exhibition](https://udeudeude.github.io/#project-sorting-cards) discovers that latest release and displays the PDF links automatically, without manual edits or stale hard-coded version numbers.
 
-The current print manuscript is [`drafts/0.3/book.md`](drafts/0.3/book.md). The modular Quarto chapters below are an earlier source edition, not the source used for the 0.3 downloads.
+The publishing job **copies original PDF bytes**. It does not re-typeset them, crop their illustrations, or silently rebuild an older manuscript. The editable source used to produce 0.5 is not yet committed. Until that source is recovered or deliberately reconstructed and reviewed, the two approved PDF exports remain authoritative. This is a real limitation: publishing is automatic **after the updated PDFs are committed**, but authoring new editions from editable source is not yet automatic.
 
-- `index.qmd` — introduction, canonical ordering, and learning method
-- `part-1-simple-sorts.qmd` — Selection, Insertion, Bubble, Concept Interlude I
-- `part-2-divide-partition-heaps.qmd` — Merge, Quick, Quickselect, Heap, Concept Interlude II
-- `part-3-noncomparison-and-gaps.qmd` — Counting, Radix, Bucket, Shell
-- `part-4-hybrids-and-synthesis.qmd` — Timsort, Introsort, synthesis
-- `appendix.qmd` — reference tables, vocabulary, printable experiment sheet, field-note prompts
-- `_quarto.yml` — Quarto book configuration
+## Earlier source and drafts
 
-## Printable downloads
+The files below remain as a historical development record, **not the current book**:
 
-These downloads are built from the current 0.3 manuscript and become available after the automated release publisher succeeds:
+- [drafts/0.3/book.md](drafts/0.3/book.md) and [drafts/0.3/book-illustrated.md](drafts/0.3/book-illustrated.md): edition 0.3 experiments.
+- Older modular course source: index.qmd, part-*.qmd, appendix.qmd, _quarto.yml.
+- [Version 0.3 release](https://github.com/udeudeude/Sorting-Algorithms-with-Playing-Cards/releases/tag/learner-draft-0.3): archived output, superseded by 0.5.
 
-- [Download the complete course (standard PDF)](https://github.com/udeudeude/Sorting-Algorithms-with-Playing-Cards/releases/download/learner-draft-0.3/sorting-algorithms-with-playing-cards.pdf)
-- [Download the printer-ready folded booklet (PDF)](https://github.com/udeudeude/Sorting-Algorithms-with-Playing-Cards/releases/download/learner-draft-0.3/sorting-algorithms-booklet-print.pdf)
-- [Download the small-page booklet for reading (PDF)](https://github.com/udeudeude/Sorting-Algorithms-with-Playing-Cards/releases/download/learner-draft-0.3/sorting-algorithms-booklet-pages.pdf)
-
-The printer-ready booklet is imposed two-up on **US-letter landscape sheets**. Print double-sided, **flip on short edge**, at actual size. Fold each set of up to eight sheets separately into signatures, then stack them in sequence. The small-page booklet PDF is intended for screen reading or manual printing, not automatic duplex imposition.
-
-## Rebuild the PDFs
-
-Install [Quarto](https://quarto.org/) (for its bundled Pandoc), a LaTeX distribution with XeLaTeX, and PyMuPDF. The [release workflow](.github/workflows/publish-pdfs.yml) renders `drafts/0.3/book.md` twice (standard and compact-page formats) and imposes the latter into a duplex booklet with `scripts/impose_booklet.py`. The workflow checks the document and page geometry before uploading release assets.
-
-The 0.3 manuscript references a cover art file that is not committed. The release build preserves the typographic title page but omits that missing picture rather than substituting unrelated artwork.
-
-## Status
-
-**Learner Field-Test Edition 0.3** is a field-test manuscript, not a finished publication. The source is intentionally modular so lessons, exercises, diagrams, and explanatory interludes can be revised independently after actual use.
-
-## Suggested GitHub repository description
-
-> Learn sorting algorithms hands-on with a standard deck of playing cards, comparing physical and computational models of sorting.
+The old material must not be used by the release publisher to overwrite the newer teaching edition.
