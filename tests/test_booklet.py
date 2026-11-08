@@ -1,9 +1,11 @@
 """Regression test for two-up signature ordering and printable sheet dimensions."""
 import tempfile
+import sys
 from pathlib import Path
 
 import fitz
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts.impose_booklet import impose
 
 
