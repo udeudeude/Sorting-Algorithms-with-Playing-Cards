@@ -1,0 +1,93 @@
+name: Build downloadable course and booklet PDFs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**/*.qmd'
+      - '_quarto.yml'
+      - '_quarto-booklet.yml'
+      - 'scripts/impose_booklet.py'
+      - '.github/workflows/publish-pdfs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-sorting-pdfs
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Quarto and LaTeX
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          tinytex: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install booklet imposition library
+        run: python -m pip install 'pymupdf==1.26.5'
+      - name: Build standard reading PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+          quarto render --to pdf
+          source_pdf="$(find _book -maxdepth 1 -type f -iname '*.pdf' -print -quit)"
+          test -n "$source_pdf"
+          mkdir -p downloads
+          cp "$source_pdf" downloads/sorting-algorithms-with-playing-cards.pdf
+      - name: Build compact booklet and impose duplex sheets
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f _book/*.pdf
+          quarto render --to pdf --profile booklet
+          booklet_pdf="$(find _book -maxdepth 1 -type f -iname '*.pdf' -print -quit)"
+          test -n "$booklet_pdf"
+          cp "$booklet_pdf" downloads/sorting-algorithms-booklet-pages.pdf
+          python scripts/impose_booklet.py             downloads/sorting-algorithms-booklet-pages.pdf             downloads/sorting-algorithms-booklet-print.pdf             --signature-sheets 8
+      - name: Verify PDFs and duplex geometry
+        shell: bash
+        run: |
+          python - <<'PY'
+          import fitz
+          from pathlib import Path
+          root = Path('downloads')
+          expected = {
+              'sorting-algorithms-with-playing-cards.pdf',
+              'sorting-algorithms-booklet-pages.pdf',
+              'sorting-algorithms-booklet-print.pdf',
+          }
+          assert {p.name for p in root.glob('*.pdf')} == expected
+          for filename in sorted(expected):
+              doc = fitz.open(root / filename)
+              assert doc.page_count > 4, (filename, doc.page_count)
+              assert len(doc[0].get_text().strip()) > 0 or filename.endswith('booklet-print.pdf'), filename
+              if filename.endswith('booklet-print.pdf'):
+                  assert doc.page_count % 2 == 0
+                  assert all(abs(page.rect.width - 792) < 1 and abs(page.rect.height - 612) < 1 for page in doc)
+              print(filename, doc.page_count, 'pages')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sorting-algorithms-pdfs
+          path: downloads/*.pdf
+      - name: Publish stable direct-download release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! gh release view learner-draft-0.2 > /dev/null 2>&1; then
+            gh release create learner-draft-0.2 \
+              --target main \
+              --title "Sorting Algorithms with Playing Cards - Learner Draft 0.2" \
+              --notes "Printable learning draft. Includes a standard reading PDF, compact page PDF and duplex-imposed US-letter booklet PDF. For booklet printing, use landscape, double-sided, flip on short edge, actual size, and fold each eight-sheet signature separately." \
+              --prerelease
+          fi
+          gh release upload learner-draft-0.2 downloads/*.pdf --clobber
