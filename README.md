@@ -2,7 +2,7 @@
 
 A hands-on course for learning sorting algorithms with a standard 52-card deck while comparing two different worlds of algorithmic cost: **what is efficient for a computer** and **what is efficient for human hands at a table**.
 
-The current manuscript is **Learner Draft 0.2**. It is deliberately complete before it is polished: the first learner will print it, work through it with cards, and use that experience to drive the teaching edition.
+The current manuscript is **Learner Field-Test Edition 0.3**. It is deliberately complete before it is polished: the first learner will print it, work through it with cards, and use that experience to drive the teaching edition.
 
 ## Canonical deck order
 
@@ -27,9 +27,12 @@ All full-deck exercises use:
 13. Shellsort
 14. Timsort
 15. Introsort
-16. Synthesis and strategy selection
+16. Cycle Sort
+17. Synthesis and strategy selection
 
 ## Project structure
+
+The current print manuscript is [`drafts/0.3/book.md`](drafts/0.3/book.md). The modular Quarto chapters below are an earlier source edition, not the source used for the 0.3 downloads.
 
 - `index.qmd` — introduction, canonical ordering, and learning method
 - `part-1-simple-sorts.qmd` — Selection, Insertion, Bubble, Concept Interlude I
@@ -41,29 +44,23 @@ All full-deck exercises use:
 
 ## Printable downloads
 
-These downloads are built from the current manuscript and published as **Learner Draft 0.2** release assets:
+These downloads are built from the current 0.3 manuscript and become available after the automated release publisher succeeds:
 
-- [Download the complete course (standard PDF)](https://github.com/udeudeude/Sorting-Algorithms-with-Playing-Cards/releases/download/learner-draft-0.2/sorting-algorithms-with-playing-cards.pdf)
-- [Download the printer-ready folded booklet (PDF)](https://github.com/udeudeude/Sorting-Algorithms-with-Playing-Cards/releases/download/learner-draft-0.2/sorting-algorithms-booklet-print.pdf)
-- [Download the small-page booklet for reading (PDF)](https://github.com/udeudeude/Sorting-Algorithms-with-Playing-Cards/releases/download/learner-draft-0.2/sorting-algorithms-booklet-pages.pdf)
+- [Download the complete course (standard PDF)](https://github.com/udeudeude/Sorting-Algorithms-with-Playing-Cards/releases/download/learner-draft-0.3/sorting-algorithms-with-playing-cards.pdf)
+- [Download the printer-ready folded booklet (PDF)](https://github.com/udeudeude/Sorting-Algorithms-with-Playing-Cards/releases/download/learner-draft-0.3/sorting-algorithms-booklet-print.pdf)
+- [Download the small-page booklet for reading (PDF)](https://github.com/udeudeude/Sorting-Algorithms-with-Playing-Cards/releases/download/learner-draft-0.3/sorting-algorithms-booklet-pages.pdf)
 
 The printer-ready booklet is imposed two-up on **US-letter landscape sheets**. Print double-sided, **flip on short edge**, at actual size. Fold each set of up to eight sheets separately into signatures, then stack them in sequence. The small-page booklet PDF is intended for screen reading or manual printing, not automatic duplex imposition.
 
 ## Rebuild the PDFs
 
-Install [Quarto](https://quarto.org/), a compatible LaTeX distribution, and PyMuPDF, then:
+Install [Quarto](https://quarto.org/) (for its bundled Pandoc), a LaTeX distribution with XeLaTeX, and PyMuPDF. The [release workflow](.github/workflows/publish-pdfs.yml) renders `drafts/0.3/book.md` twice (standard and compact-page formats) and imposes the latter into a duplex booklet with `scripts/impose_booklet.py`. The workflow checks the document and page geometry before uploading release assets.
 
-```bash
-quarto render --to pdf
-quarto render --to pdf --profile booklet
-python scripts/impose_booklet.py <booklet-pages.pdf> <booklet-print.pdf>
-```
-
-GitHub Actions builds, validates, and uploads all three PDFs to the same tagged pre-release when the manuscript changes. The manuscript remains a learner draft, not a finished teaching edition.
+The 0.3 manuscript references a cover art file that is not committed. The release build preserves the typographic title page but omits that missing picture rather than substituting unrelated artwork.
 
 ## Status
 
-**Learner Draft 0.2** is a field-test manuscript, not a finished publication. The source is intentionally modular so lessons, exercises, diagrams, and explanatory interludes can be revised independently after actual use.
+**Learner Field-Test Edition 0.3** is a field-test manuscript, not a finished publication. The source is intentionally modular so lessons, exercises, diagrams, and explanatory interludes can be revised independently after actual use.
 
 ## Suggested GitHub repository description
 
