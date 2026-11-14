@@ -5,6 +5,7 @@ Fails closed: never replaces missing illustrations, and never publishes by itsel
 Requires pandoc, xelatex, and PyMuPDF.
 """
 import argparse
+import tempfile
 import hashlib
 import json
 import re
@@ -69,6 +70,7 @@ def sha256(path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--version", required=True)
+    parser.add_argument("--text-only", action="store_true", help="Omit unavailable artwork with explicit labeling")
     parser.add_argument("--output", type=Path, default=ROOT / "build")
     args = parser.parse_args()
     if not re.fullmatch(r"[0-9]+\.[0-9]+(?:\.[0-9]+)?", args.version):
@@ -77,15 +79,28 @@ def main():
     sources = [source_dir / "reading.md", source_dir / "booklet.md"]
     if not all(p.is_file() for p in sources):
         raise SystemExit("Missing complete reading/booklet manuscript pair")
-    check_assets(source_dir, sources)
+    if not args.text_only:
+        check_assets(source_dir, sources)
     outdir = args.output.resolve()
     outdir.mkdir(parents=True, exist_ok=True)
     reading = outdir / "Sorting-Algorithms-with-Playing-Cards.pdf"
     half = outdir / "half-letter-intermediate.pdf"
     booklet = outdir / "Sorting-Algorithms-with-Playing-Cards-Booklet-LONG-EDGE.pdf"
-    for source, target in zip(sources, (reading, half)):
-        run(["pandoc", source.name, "--pdf-engine=xelatex", "--standalone",
-             "-o", str(target)], cwd=source_dir)
+    with tempfile.TemporaryDirectory(prefix="sorting-build-") as tmp:
+        for source, target in zip(sources, (reading, half)):
+            text = source.read_text(encoding="utf-8")
+            if args.text_only:
+                missing = {str(p) for p in required_assets(source) if not (source_dir / p).is_file()}
+                for asset in missing:
+                    text = re.sub(r"\\includegraphics(?:\[[^]]*\])?\{" + re.escape(asset) + r"\}", "", text)
+                    text = re.sub(r"!\[[^]]*\]\(" + re.escape(asset) + r"\)", "", text)
+                text = text.replace("\\begin{center}\n\\end{center}", "")
+                text = text.replace("# Contents at a glance",
+                    "# Contents at a glance\n\n*Text-only edition: original artwork omitted pending recovery.*\n", 1)
+            tmp_source = Path(tmp) / source.name
+            tmp_source.write_text(text, encoding="utf-8")
+            run(["pandoc", str(tmp_source), "--pdf-engine=xelatex", "--standalone",
+                 "--resource-path", str(source_dir), "-o", str(target)], cwd=source_dir)
     logical, sheets = impose(half, booklet)
     with fitz.open(reading) as doc:
         pages = len(doc)
@@ -94,6 +109,7 @@ def main():
         assert all(page.rotation == 180*(i % 2) for i, page in enumerate(doc))
     report = {
         "version": args.version,
+        "text_only": args.text_only,
         "reading": {"file": reading.name, "pages": pages, "sha256": sha256(reading)},
         "booklet": {"file": booklet.name, "sheets": sheets, "logical_pages": logical,
                     "pdf_pages": sheets*2, "sha256": sha256(booklet)},
