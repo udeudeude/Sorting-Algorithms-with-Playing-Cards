@@ -43,7 +43,7 @@ jobs:
                   text = ' '.join(p.get_text() for p in doc)
                   for chapter in ('Selection Sort', 'Insertion Sort', 'Merge Sort',
                                   'Cycle Sort', 'Bogosort', 'Stooge Sort',
-                                  'Reading the Algorithm Profiles'):
+                                  'Reading the algorithm profiles'):
                       assert chapter in text, (name, chapter)
                   assert len(doc) > 35, (name, len(doc))
                   print(name, len(doc), 'pages')
