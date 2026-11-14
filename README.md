@@ -2,9 +2,21 @@
 
 An illustrated, hands-on course in thirteen sorting algorithms using a standard 52-card deck. Each method is examined in three settings: on a computer, on a table, and in the hands.
 
-## Current edition: Learner 0.5
+## Latest downloadable edition: 0.9 (text-only)
 
-**The approved edition is 0.5, not the older 0.3 manuscript or its automatically rendered PDFs.**
+GitHub Actions now builds and publishes both PDFs directly from the preserved 0.9 manuscripts. The original artwork is **temporarily omitted**, explicitly labeled as such, rather than being replaced with invented images.
+
+- [Read Edition 0.9 (PDF)](https://github.com/udeudeude/Sorting-Algorithms-with-Playing-Cards/releases/download/v0.9/Sorting-Algorithms-with-Playing-Cards.pdf)
+- [Print Edition 0.9 booklet (PDF, long-edge duplex)](https://github.com/udeudeude/Sorting-Algorithms-with-Playing-Cards/releases/download/v0.9/Sorting-Algorithms-with-Playing-Cards-Booklet-LONG-EDGE.pdf)
+- [Release details](https://github.com/udeudeude/Sorting-Algorithms-with-Playing-Cards/releases/tag/v0.9)
+
+**Important:** `current-edition.json` still describes the previously approved **illustrated** 0.5 originals. The text-only 0.9 release is a separate publication path. It does not claim visual equivalence to the illustrated edition.
+
+The [generated release workflow](.github/workflows/publish-generated.yml) builds, validates and uploads both PDFs on GitHub's runners. The Exhibition automatically discovers the latest release with both named files. Future editions must update the version and source path in the generated-release workflow before publication.
+
+## Previously approved illustrated edition: Learner 0.5
+
+**The approved illustrated edition is 0.5; the latest publicly downloadable text-only edition is 0.9.**
 
 The authoritative publication consists of two matching, illustrated PDFs:
 
