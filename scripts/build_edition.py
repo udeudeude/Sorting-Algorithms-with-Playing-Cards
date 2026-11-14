@@ -85,7 +85,7 @@ def main():
     booklet = outdir / "Sorting-Algorithms-with-Playing-Cards-Booklet-LONG-EDGE.pdf"
     for source, target in zip(sources, (reading, half)):
         run(["pandoc", source.name, "--pdf-engine=xelatex", "--standalone",
-             "--toc", "--number-sections", "-o", str(target)], cwd=source_dir)
+             "-o", str(target)], cwd=source_dir)
     logical, sheets = impose(half, booklet)
     with fitz.open(reading) as doc:
         pages = len(doc)
