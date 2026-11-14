@@ -88,9 +88,9 @@ jobs:
           cat > /tmp/edition-notes.txt <<EOF
           Sorting Algorithms with Playing Cards, learner edition ${VERSION}.
 
-          These are the original approved illustrated PDFs, not a rebuild of draft 0.3.
+          These are the reviewed illustrated PDFs identified by current-edition.json.
           Print the booklet landscape, double-sided, flip on LONG edge, at actual size.
-          Edition 0.5 occupies 18 sheets. File checksums are in current-edition.json.
+          The booklet sheet count and exact checksums are recorded in current-edition.json.
           EOF
           if ! gh release view "$TAG" >/dev/null 2>&1; then
             gh release create "$TAG" --draft --target "$GITHUB_SHA" \
