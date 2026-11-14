@@ -1,0 +1,81 @@
+name: Build and publish current text-only edition
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/build_edition.py'
+      - '.github/workflows/publish-generated.yml'
+      - 'drafts/0.9/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-generated-v09
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PDF toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc texlive-xetex texlive-latex-extra texlive-fonts-recommended fonts-dejavu-core
+          python -m pip install 'pymupdf==1.26.5'
+      - name: Generate PDFs from complete 0.9 manuscript
+        run: python scripts/build_edition.py --version 0.9 --text-only --output build
+      - name: Validate content, orientation and output
+        run: |
+          python - <<'PY'
+          import fitz, json
+          from pathlib import Path
+          report = json.loads(Path('build/build-report.json').read_text())
+          assert report['version'] == '0.9' and report['text_only']
+          names = ['Sorting-Algorithms-with-Playing-Cards.pdf',
+                   'Sorting-Algorithms-with-Playing-Cards-Booklet-LONG-EDGE.pdf']
+          for name in names:
+              with fitz.open(Path('build') / name) as doc:
+                  text = ' '.join(p.get_text() for p in doc)
+                  for chapter in ('Selection Sort', 'Insertion Sort', 'Merge Sort',
+                                  'Cycle Sort', 'Bogosort', 'Stooge Sort',
+                                  'Reading the Algorithm Profiles'):
+                      assert chapter in text, (name, chapter)
+                  assert len(doc) > 35, (name, len(doc))
+                  print(name, len(doc), 'pages')
+          with fitz.open(Path('build') / names[1]) as doc:
+              assert len(doc) % 2 == 0
+              assert all(abs(p.rect.width - 792) < 1 or abs(p.rect.height - 792) < 1 for p in doc)
+              assert [p.rotation for p in doc] == [180*(i%2) for i in range(len(doc))]
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: edition-0.9-text-only-verified
+          path: |
+            build/*.pdf
+            build/build-report.json
+          if-no-files-found: error
+      - name: Publish labeled release with stable download names
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG=v0.9
+          cat > /tmp/notes.txt <<'EOF'
+          Sorting Algorithms with Playing Cards - Edition 0.9 (text-only).
+          Complete manuscript and algorithm profiles. The original decorative artwork is
+          temporarily omitted, not replaced. This is a text-only publication, not the
+          approved illustrated 0.5 PDF.
+          Booklet: Letter landscape, double-sided, flip on LONG edge, actual size.
+          EOF
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --draft --target "$GITHUB_SHA" --title "Edition 0.9 - Text-only" --notes-file /tmp/notes.txt
+          fi
+          gh release upload "$TAG" build/Sorting-Algorithms-with-Playing-Cards.pdf build/Sorting-Algorithms-with-Playing-Cards-Booklet-LONG-EDGE.pdf --clobber
+          gh release edit "$TAG" --draft=false --prerelease=false --latest --title "Edition 0.9 - Text-only" --notes-file /tmp/notes.txt
+          gh release view "$TAG" --json assets --jq '.assets[].name' | grep -Fxq 'Sorting-Algorithms-with-Playing-Cards.pdf'
+          gh release view "$TAG" --json assets --jq '.assets[].name' | grep -Fxq 'Sorting-Algorithms-with-Playing-Cards-Booklet-LONG-EDGE.pdf'
